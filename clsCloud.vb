@@ -21,7 +21,7 @@ Public Class clsCloud
     Sub New()
         CheckClouds()
     End Sub
-
+    
     Public Sub CheckClouds()
         'DropBox
         Dim dbPath As String = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Dropbox\host.db")
@@ -37,17 +37,25 @@ Public Class clsCloud
                 DropBoxExist = False
             End Try
         End If
-
+                       
         'GoogleDrive
-        dbPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\Google\Drive\user_default\sync_config.db"
-        If myFile.Exist(dbPath) = False Then dbPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\Google\Drive\sync_config.db"
-        Try
-            Dim gFolder As String = GetFolderFromFile(dbPath)
-            GoogleDriveExist = myFolder.Exist(gFolder)
-            If GoogleDriveExist Then GoogleDriveFolder = gFolder
-        Catch ex As Exception
-            GoogleDriveExist = False
-        End Try
+        sFolder = myRegister.GetValue(HKEY.CURRENT_USER, "SOFTWARE\Google\DriveFS\Share", "BasePath", "")
+        If Not sFolder = "" Then
+            dbPath = myFolder.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Disk Google")
+            If myFolder.Exist(dbPath) = False Then dbPath = myFolder.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Můj Disk")
+            GoogleDriveExist = myFolder.Exist(dbPath)
+            If GoogleDriveExist Then GoogleDriveFolder = dbPath
+        Else
+            dbPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\Google\Drive\user_default\sync_config.db"
+            If myFile.Exist(dbPath) = False Then dbPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\Google\Drive\sync_config.db"
+            Try
+                Dim gFolder As String = GetFolderFromFile(dbPath)
+                GoogleDriveExist = myFolder.Exist(gFolder)
+                If GoogleDriveExist Then GoogleDriveFolder = gFolder
+            Catch ex As Exception
+                GoogleDriveExist = False
+            End Try
+        End If
 
         'OneDrive
         Dim sFolder As String = myRegister.GetValue(HKEY.CURRENT_USER, "Software\Microsoft\OneDrive", "UserFolder", "")
